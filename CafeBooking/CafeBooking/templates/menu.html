@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Меню{% endblock %}
+{% block urls %}
+	<a href="/menu/" class="is-ghost">Меню</a>
+	<a href="/settings/" class="is-ghost">Настройки</a>
+	<a href="/reservations/" class="is-ghost">Бронирования</a>
+	<a href="/profile/" class="is-ghost">Профиль</a>
+{% endblock %}
+{% block content %}
+{% load static %}
+<div style="display: flex; justify-content: center; flex-direction: column; align-items: center;">
+	<h1 class="title is-2">Меню</h1>
+	<div class="box" style="margin-bottom: 40px; padding-top: 20px; padding-bottom: 20px; gap: 20px; width: fit-content; display: flex; flex-direction: column;justify-content: center;align-items: center;">
+		<a class="button" style="width: 100%;" href="/settings/">Настройки</a>
+		<a class="button" style="width: 100%;" href="/profile/">Профиль</a>
+		<a class="button" style="width: 100%;" href="/user-reservations/">Мои бронирования</a>
+		<a class="button" style="width: 100%;" href="/reservations/">Новое бронирование</a>
+		{% if role == "Head" or role == "Admin" %}
+		<a class="button" style="width: 100%;" href="/head-panel/">Панель руководителя</a>
+		{% endif %}
+		{% if role == "Admin" %}
+		<a class="button" style="width: 100%;" href="/admin/">Панель администратора</a>
+		{% endif %}
+	</div>
+</div>
+{% endblock %}

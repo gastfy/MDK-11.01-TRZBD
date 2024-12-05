@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+{% block scale %}
+<meta name="viewport" content="width=device-width, initial-scale=0.8">
+{% endblock %}
+
+{% block title %}Админ-панель{% endblock %}
+{% block urls %}
+<a href="/menu/" class="is-ghost">Меню</a>
+<a href="/admin" class="is-ghost">Админ-панель</a>
+<a href="/profile" class="is-ghost">Профиль</a>
+{% endblock %}
+{% block content %}
+{% load static %}
+<link href="{% static 'admin.css' %}" rel="stylesheet" type="text/css">
+
+<div class="admin-content">
+	<div class="content">
+		<div class="left-panel box">
+			<div class="left-panel-text">
+				<h1>Сущности</h1>
+			</div>
+			<hr>
+			<div class="entity-container">
+				<a href="/admin/?entity=users" class="button {% if entity == 'users' %}is-primary{% endif %}">Пользователи</a>
+				<a href="/admin/?entity=offices" class="button {% if entity == 'offices' %}is-primary{% endif %}">Офисы</a>
+				<a href="/admin/?entity=places" class="button {% if entity == 'places' %}is-primary{% endif %}">Места</a>
+				<a href="/admin/?entity=reservations" class="button {% if entity == 'reservations' %}is-primary{% endif %}">Бронирования</a>
+				<a href="/admin/?entity=logs" class="button {% if entity == 'logs' %}is-primary{% endif %}">Логи</a>
+				<a href="/admin/?entity=graph" class="button {% if entity == 'graph' %}is-primary{% endif %}">Графики</a>
+				<a href="/admin/?entity=archive" class="button {% if entity == 'archive' %}is-primary{% endif %}">Архив бронирований</a>
+				<a href="/admin/?entity=settings" class="button {% if entity == 'settings' %}is-primary{% endif %}">Настройки</a>
+			</div>
+		</div>
+		<div class="entity-content">
+			{% if entity != 'logs' and entity != 'settings' and entity != 'graph' and entity != 'archive' %}
+			<div class="level box entity-name">
+					{% if entity == 'users' %}
+					<tr>
+						<h3 class="subtitle is-5" style="margin-bottom: 0;">Пользователи</h3>
+					</tr>
+					{% elif entity == 'offices' %}
+					<tr>
+						<h3 class="subtitle is-5" style="margin-bottom: 0;">Офисы</h3>
+					</tr>
+					{% elif entity == 'places' %}
+					<tr>
+						<h3 class="subtitle is-5" style="margin-bottom: 0;">Места</h3>
+					</tr>
+					{% elif entity == 'reservations' %}
+					<tr>
+						<h3 class="subtitle is-5" style="margin-bottom: 0;">Бронирования, количество бронирований: {{ count }}</h3>
+					</tr>
+					{% endif %}
+				<a href="/admin/add/?entity={{ entity }}">Добавить +</a>
+			</div>
+			{% endif %}
+			{% if entity == 'logs' %}
+			<div class="box" style="margin-left: 20px;">
+				<h2>Фильтр</h2>
+				<input class="input" type="text" name="find_by_id" placeholder="Поиск по ID">
+				<script src="{% static 'filter.js' %}"></script>
+			</div>
+			<div class="box" style="margin-left: 20px;">
+				<h2>Поиск</h2>
+				<input class="input" type="text" name="finder" placeholder="Поиск по дате">
+				<script src="{% static 'find.js' %}"></script>
+			</div>
+			{% endif %}
+			{% if entity != 'settings' and entity != 'graph' %}
+			<div class="table-container box" {% if entity == 'logs' or entity == 'archive' %} style="margin-top: 20px;max-height: 545px;" {% endif %}>
+				<script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>
+				<table class="sortable table is-hoverable is-fullwidth" id="my_table">
+					<thead>
+						{% if entity == 'users' %}
+						<tr>
+							<th>ID</th>
+							<th>Имя</th>
+							<th>Фамилия</th>
+							<th>Логин</th>
+							<th>Почта</th>
+							<th>Роль</th>
+							<th>Заблокирован</th>
+						</tr>
+						{% elif entity == 'offices' %}
+						<tr>
+							<th>ID</th>
+							<th>Адрес</th>
+						</tr>
+						{% elif entity == 'places' %}
+						<tr>
+							<th>ID</th>
+							<th>Тип места</th>
+							<th>Название стола</th>
+							<th>Адрес офиса</th>
+						</tr>
+						{% elif entity == 'reservations' %}
+						<tr>
+							<th>ID</th>
+							<th><abbr title="Пользователь">Пол.</abbr></th>
+							<th>Тип</th>
+							<th>Дата</th>
+							<th>Время</th>
+							<th>Статус</th>
+							<th><abbr title="Причина отмены">Пр.</abbr></th>
+						</tr>
+						{% elif entity == 'logs' %}
+						<tr>
+							<th>ID</th>
+							<th><abbr title="Время создания">Вр.</abbr></th>
+							<th>Лог</th>
+						</tr>
+						{% elif entity == 'archive' %}
+						<tr>
+							<th>ID</th>
+							<th><abbr title="Пользователь">Пол.</abbr></th>
+							<th>Тип</th>
+							<th>Дата</th>
+							<th>Время</th>
+							<th>Статус</th>
+							<th><abbr title="Причина отмены">Пр.</abbr></th>
+							<th>Время создания</th>
+						</tr>
+						{% endif %}
+					</thead>
+					<tbody>
+						{% for item in data %}
+						<tr>
+							{% if entity == 'users' %}
+							<td>{{ item.id }}</td>
+							<td>{{ item.name }}</td>
+							<td>{{ item.lastname }}</td>
+							<td>{{ item.login }}</td>
+							<td>{{ item.email }}</td>
+							<td>{{ item.role }}</td>
+							<td>{{ item.get_is_blocked }}</td>
+							{% elif entity == 'offices' %}
+							<td>{{ item.id }}</td>
+							<td>{{ item.address }}</td>
+							{% elif entity == 'places' %}
+							<td>{{ item.id }}</td>
+							<td>{{ item.name }}</td>
+							<td>{{ item.place.short_name }}</td>
+							<td>{{ item.place.office }}</td>
+							{% elif entity == 'reservations' %}
+							<td>{{ item.id }}</td>
+							<td>{{ item.user.name }}</td>
+							<td>{{ item.type.name }}</td>
+							<td>{{ item.date }}</td>
+							<td>{{ item.time.time }}</td>
+							<td>{{ item.status.status }}</td>
+							<td>{{ item.cancel_reason }}</td>
+							{% elif entity == 'logs' %}
+							<td>{{ item.id }}</td>
+							<td>{{ item.timestamp }}</td>
+							<td>{{ item.action }}</td>
+							{% elif entity == 'archive' %}
+							<td>{{ item.id }}</td>
+							<td>{{ item.user.name }}</td>
+							<td>{{ item.type.name }}</td>
+							<td>{{ item.date }}</td>
+							<td>{{ item.time.time }}</td>
+							<td>Архивировано</td>
+							<td>{{ item.cancel_reason }}</td>
+							<td>{{ item.creation_time }}</td>
+							{% endif %}
+							{% if entity != 'logs' and entity != 'settings' and entity != 'archive' %}
+							<td>
+								<a class="button" href="edit/?id={{ item.id }}&entity={{ entity }}">
+									<span class="icon is-small">
+										<i class="fa-solid fa-pen"></i>
+									</span>
+								  </a>
+							</td>
+							<td>
+								<a class="button" href="delete/?id={{ item.id }}&entity={{ entity }}">
+									<span class="icon is-small">
+										<i class="fa-solid fa-trash"></i>
+									</span>
+								  </a>
+							</td>
+							{% endif %}
+							{% if entity == 'users' %}
+							{% if item.is_blocked %}
+							<td>
+								<a class="button" href="unban/?id={{ item.id }}">
+									<span class="icon is-small">
+										<i class="fa-solid fa-user"></i>
+									</span>
+								  </a>
+							</td>
+							{% else %}
+							<td>
+								<a class="button" href="ban/?id={{ item.id }}">
+									<span class="icon is-small">
+										<i class="fa-solid fa-user-slash"></i>
+									</span>
+								  </a>
+							</td>
+							{% endif %}
+							{% elif entity == 'reservations' %}
+								{% if item.status.status != 'Отменено' %}
+									<td>
+										<a class="button" href="cancel/?id={{ item.id }}">
+											<span class="icon is-small">
+												<i class="fa-solid fa-ban"></i>
+											</span>
+										</a>
+									</td>
+								{% endif %}
+							{% endif %}
+
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+			{% elif entity == 'settings' %}
+			<div class="settings-container box">
+				
+				<h1>Настройки</h1><hr>
+				<div class="options-container">
+					<div class="box">
+						<h3>Сделать бекап БД</h3>
+						<a href="create-dump/" download="" class="button">Сделать бекап</a>
+					</div>
+					<div class="box">
+						{% load crispy_forms_tags %}
+						<h3>Загрузить бекап БД</h3>
+						<form action="/admin/upload/" method="post" enctype="multipart/form-data">
+							{% csrf_token %}
+							{% crispy form %}
+						</form>
+					</div>
+					<div class="box">
+						{% load crispy_forms_tags %}
+						<h3>Указать число месяцев для архивации</h3>
+						<form action="/admin/set-archive-time/" method="post" enctype="multipart/form-data">
+							{% csrf_token %}
+							{% crispy form_months %}
+						</form>
+					</div>
+					<div class="box">
+						<h3>Удалить все архивированные значения</h3>
+						<a href="/delete-archivated/" download="" class="button">Удалить</a>
+					</div>
+				</div>
+			</div>
+			{% elif entity == 'graph' %}
+			<div class="graph-content-container">
+				<div class="graph-navbar box">
+					<a href="/admin/?entity=graph&graphic=days" class="button {% if graphic == 'days' or graphic == None %}is-primary{% endif %}">График по последней неделе</a>
+					<a href="/admin/?entity=graph&graphic=tables" class="button {% if graphic == 'tables' %}is-primary{% endif %}">График 10 популярных столов</a>
+					<a href="/admin/?entity=graph&graphic=rooms" class="button {% if graphic == 'rooms' %}is-primary{% endif %}">График пользования комнатами</a>
+				</div>	
+				<div class="graph-container box">
+					<div id="chartContainer" style="width: 100%; height: 360px;"></div>
+				</div>
+			</div>
+			{% endif %}
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'file-upload.js' %}"></script>
+{% if entity == 'graph' %}
+<script src="https://cdn.canvasjs.com/ga/canvasjs.min.js"></script>
+<script>
+	window.onload = function () {
+		var chart = new CanvasJS.Chart("chartContainer", {
+			animationEnabled: true, // change to false
+			title:{
+				text: "{{ chart_title }}"
+			},
+			data: [{
+				type: "{{ data_type }}",
+				dataPoints: {{ data | safe }}
+			}]
+		});
+		chart.render();
+	}
+</script>
+{% endif %}
+{% endblock %}

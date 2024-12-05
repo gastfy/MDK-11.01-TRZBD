@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}Мои бронирования{% endblock %}
+{% block urls %}
+	<a href="/menu/" class="is-ghost">Меню</a>
+	<a href="/settings/" class="is-ghost">Настройки</a>
+	<a href="/reservations/" class="is-ghost">Бронирования</a>
+	<a href="/profile/" class="is-ghost">Профиль</a>
+{% endblock %}
+{% block content %}
+{% load static %}
+<link href="{% static 'user_reservations.css' %}" rel="stylesheet" type="text/css">
+<div class="tables-container">
+	<script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>
+	<div class="table-container" style="margin-bottom: 0;">
+		<div class="label">
+			<h2 class="title is-3" style="margin-bottom: 0;">Мои бронирования</h2>
+			<a class="button is-ghost" href="/reservations/">
+				<span class="icon is-small">
+					<i class="fa-solid fa-plus"></i>
+				</span>
+			</a>
+		</div>
+		<div class="stuff box">
+			<table class="table sortable">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Место</th>
+						<th>Тип места</th>
+						<th>Дата</th>
+						<th>Время</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for item in active %}
+						<tr>
+							<td>{{ item.reservation.id }}</td>
+							<td>{{ item.reservation.type.place.short_name }}</td>
+							<td>{{ item.reservation.type.name }}</td>
+							<td>{{ item.reservation.date }}</td>
+							<td>{{ item.reservation.time.time }}</td>
+							<td>
+								<a class="button" href="/cancel/{{ item.reservation.id }}/">
+									<span class="icon is-small">
+										<i class="fa-solid fa-circle-xmark"></i>
+									</span>
+								</a>
+							</td>
+							{% if item.continue %}
+							<td>
+								<a class="button" href="/continue/{{ item.reservation.id }}/">
+									<span class="icon is-small">
+										<i class="fa-solid fa-clock"></i>
+									</span>
+								</a>
+							</td>
+							{% endif %}
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="table-container">
+		<div class="label">
+			<h2 class="title is-3">История бронирований</h2>
+		</div>
+		<div class="box">
+			<table class="table sortable">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Место</th>
+						<th>Тип места</th>
+						<th>Дата</th>
+						<th>Время</th>
+						<th>Статус</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for item in history %}
+						<tr>
+							<td>{{ item.id }}</td>
+							<td>{{ item.type.place.short_name }}</td>
+							<td>{{ item.type.name }}</td>
+							<td>{{ item.date }}</td>
+							<td>{{ item.time.time }}</td>
+							<td>{{ item.status.status }}</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+{% endblock %}

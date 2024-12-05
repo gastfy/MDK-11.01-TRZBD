@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Авторизация{% endblock %}
+{% block content %}
+{% load static %}
+<link href="{% static 'login.css' %}" rel="stylesheet" type="text/css">
+<div class="container">
+	<div class="form-container">
+		<form id="loginform" action="/login/" method="post">
+			{% csrf_token %}
+			<input type="submit" hidden />
+			{% crispy form %}
+		</form>
+	</div>
+	<div class="button-container">
+		<div>
+			<input class="button is-primary" type="submit" form="loginform" value="Войти"/>
+		</div>
+		<div class="rules">
+			<h2>При авторизации вы соглашаетесь на сбор и обработку персональных данных.</h2>
+		</div>
+	</div>
+</div>
+{% endblock %}

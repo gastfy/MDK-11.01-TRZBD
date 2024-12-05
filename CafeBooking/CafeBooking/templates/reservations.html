@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Бронирования{% endblock %}
+{% block urls %}
+	<a href="/menu/" class="is-ghost">Меню</a>
+	<a href="/settings/" class="is-ghost">Настройки</a>
+	<a href="/reservations/" class="is-ghost">Бронирования</a>
+	<a href="/profile/" class="is-ghost">Профиль</a>
+{% endblock %}
+{% block content %}
+{% load static %}
+<link href="{% static 'reservations.css' %}" rel="stylesheet" type="text/css">
+<div class="titles-container">
+	<h2 class="title is-3" style="margin-bottom: 0;">Бронирование места</h2>
+	<a href="/user-reservations/" class="is-ghost">Мои бронирования</a>
+</div>
+<div class="all-card-container">
+	<form id="reserv-sort-form" action="/reservations/" method="post">
+		{% csrf_token %}
+		<input type="submit" hidden />
+		{% crispy form %}
+	</form>
+</div>
+
+<div class="map-container box">
+	<div class="column">
+		<h1 class="title is-4">Комнаты</h1>
+		<div class="rooms-container">
+			{% for room in rooms_available %}
+				<a href="/book/{{room.pk}}?office={{office}}&date={{date}}&time={{time}}">
+					<div class="room box">
+						<h5 class="subtitle is-6">{{room.place.short_name}}</h5>
+					</div>
+				</a>
+			{% endfor %}
+			{% for room in rooms_unavailable %}
+			<div class="room-red box">
+				<h5 class="subtitle is-6">{{ room.place.short_name }}</h5>
+			</div>
+			{% endfor %}
+		</div>
+	</div>
+	<div class="tables-container">
+		<div class="column">
+			<h1 class="title is-4">Столы</h1>
+			<div class="box">
+				<div class="tables-grid">
+
+					{% for table in table_available %}
+						<a href="/book/{{table.pk}}?office={{office}}&date={{date}}&time={{time}}"><div class="table-item box"><h4 class="subtitle is-6">{{ table.place.short_name }}</h4></div></a>
+					{% endfor%}
+
+					{% for table in table_unavailable %}
+					<div class="table-red box"><h4 class="subtitle is-6">{{ table.place.short_name }}</h4></div>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div style="height: 70px;"></div>
+{% endblock %}

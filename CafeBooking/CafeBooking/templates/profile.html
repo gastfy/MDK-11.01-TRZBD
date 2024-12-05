@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Авторизация{% endblock %}
+{% block urls %}
+	<a href="/menu/" class="is-ghost">Меню</a>
+	<a href="/settings/" class="is-ghost">Настройки</a>
+	<a href="/reservations/" class="is-ghost">Бронирования</a>
+	<a href="/profile/" class="is-ghost">Профиль</a>
+{% endblock %}
+{% block content %}
+{% load static %}
+<link href="{% static 'profile.css' %}" rel="stylesheet" type="text/css">
+
+<div class="content-container">
+	<div class="profile box">
+		<h1 class="title is-4" style="margin-bottom: 0;">Профиль пользователя {{ user.login }}</h1>
+		<hr>
+		<h1 class="subtitle is-5">Имя: {{ user.name }}</h1>
+		<h1 class="subtitle is-5">Фамилия: {{ user.lastname }}</h1>
+		<h1 class="subtitle is-5">Почта: {{ user.email }}</h1>
+		<h1 class="subtitle is-5">Логин: {{ user.login }}</h1>
+		<h1 class="subtitle is-5">Роль: {{ user.role }}</h1>
+	</div>
+	<div class="controls">
+		<a href="/edit" class="button">Изменить данные</a>
+		<a href="/logout" class="button">Выйти из аккаунта</a>
+		<a href="/delete" class="button is-danger">Удалить аккаунт</a>
+	</div>
+</div>
+{% endblock %}

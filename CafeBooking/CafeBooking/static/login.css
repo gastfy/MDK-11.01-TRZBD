@@ -1,0 +1,36 @@
+form {
+	width: fit-content;
+	padding: 20px;
+	justify-content: center;
+}
+.box {
+	padding: 30px;
+}
+.form-container {
+	display: flex;
+	justify-content: center;
+	margin-top: 30px;
+}
+.button-container {
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+	margin-bottom: 50px;
+	padding-bottom: 100px;
+	align-items: center;
+	gap: 10px;
+}
+.container{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+}
+.asterisk {
+	display: none;
+}
+.rules {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}

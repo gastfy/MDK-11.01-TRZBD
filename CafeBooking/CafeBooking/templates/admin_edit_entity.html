@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Добавление объекта{% endblock %}
+{% block urls %}
+<a href="/menu/" class="is-ghost">Меню</a>
+<a href="/admin" class="is-ghost">Админ-панель</a>
+<a href="/profile" class="is-ghost">Профиль</a>
+{% endblock %}
+{% block content %}
+{% load static %}
+<link href="{% static 'edit_entity.css' %}" rel="stylesheet" type="text/css">
+<div class="container">
+	<div class="form-container">
+		<form id="add-form" action="/admin/edit/?id={{ id }}&entity={{ entity }}" method="post">
+			<input type="text" name="entity" value="{{ entity }}" hidden/>
+			{% if entity == 'users' %}
+			<input type="number" name="user_id" value="{{ user_id }}" hidden/>
+			{% endif %}
+			<input type="number" name="id" value="{{ id }}" hidden/>
+			{% csrf_token %}
+			<input type="submit" hidden />
+			{% crispy form %}
+		</form>
+	</div>
+	<div class="button-container">
+		<a class="button is-primary" href="/admin">Назад</a>
+		<input class="button is-primary" type="submit" form="add-form" value="Сохранить"/>
+	</div>
+</div>
+{% endblock %}

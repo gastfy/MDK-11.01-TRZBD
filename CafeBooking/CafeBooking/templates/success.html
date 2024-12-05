@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Подтверждение{% endblock %}
+{% block urls %}
+	<a href="/menu/" class="is-ghost">Меню</a>
+	<a href="/settings/" class="is-ghost">Настройки</a>
+	<a href="/reservations/" class="is-ghost">Бронирования</a>
+	<a href="/profile/" class="is-ghost">Профиль</a>
+{% endblock %}
+{% block content %}
+{% load static %}
+<link href="{% static 'finish_booking.css' %}" rel="stylesheet" type="text/css">
+<div class="box-container">
+	<h2 class="title is-2">Успешно!</h2>
+	<a class="button" href="/menu/">Перейти в меню</a>
+</div>
+{% endblock %}

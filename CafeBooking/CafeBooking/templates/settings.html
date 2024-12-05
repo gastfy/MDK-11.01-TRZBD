@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Настройки{% endblock %}
+{% block urls %}
+	<a href="/menu/" class="is-ghost">Меню</a>
+	<a href="/settings/" class="is-ghost">Настройки</a>
+	<a href="/reservations/" class="is-ghost">Бронирования</a>
+	<a href="/profile/" class="is-ghost">Профиль</a>
+{% endblock %}
+{% block content %}
+{% load static %}
+<link href="{% static 'settings.css' %}" rel="stylesheet" type="text/css">
+<div class="content-container">
+	<h1 class="title is-1">Настройки</h1>
+	<div class="box settings-container">
+		<div class="box setting">
+			<h3 class="subtitle is-5">Изменить цветовую схему</h3>
+			<button name="scheme-changer" class="button">Изменить</button>
+		</div>
+		<a class="button is-info" href="/menu/">Назад в меню</a>
+	</div>
+</div>
+{% endblock %}

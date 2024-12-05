@@ -1,0 +1,30 @@
+.tables-container {
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+}
+.label {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-around;
+	text-align: center;
+}
+
+html {
+	zoom: .9;
+}
+
+.table-container{
+	width: fit-content;
+	padding: 10px;
+}
+
+.stuff {
+	max-height: 500px;
+	overflow: auto;
+}
+
+.table {
+	zoom: .8;
+}

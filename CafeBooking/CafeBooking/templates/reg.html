@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Регистрация{% endblock %}
+{% block urls %}
+	<a href="/login/" class="is-ghost">Войти</a>
+	<a href="/homepage/" class="is-ghost">На главную</a>
+{% endblock %}
+
+{% block content %}
+{% load static %}
+<link href="{% static 'login.css' %}" rel="stylesheet" type="text/css">
+<div class="container">
+	<div class="form-container">
+		<form id="regform" action="/reg/" method="post">
+			{% csrf_token %}
+			<input type="submit" hidden />
+			{% crispy form %}
+		</form>
+	</div>
+	<div class="button-container">
+		<div>
+			<input class="button is-primary" type="submit" form="regform" value="Зарегестироваться"/>
+		</div>
+		<div class="rules">
+			<h2>При регистрации вы соглашаетесь на сбор и обработку персональных данных.</h2>
+		</div>
+	</div>
+</div>
+{% endblock %}

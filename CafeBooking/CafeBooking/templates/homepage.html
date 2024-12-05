@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Главная{% endblock %}
+{% block urls %}
+	<a href="/login/" class="is-ghost">Войти</a>
+	<a href="/reg/" class="is-ghost">Зарегестироваться</a>
+{% endblock %}
+
+
+{% block content %}
+{% load static %}
+<div class="centered">
+	<div style="display: flex;justify-content: center;align-items: center;flex-direction: column;">
+		<h2 class="title is-3">Сервис для бронирования мест в офисе</h2>
+		<h2 class="subtitle  is-5" style="margin-bottom: 0; margin-top: 20px;">Красивый и удобный сервис для бронирований мест в офисе</h2>
+		<h2 class="subtitle  is-5">Легкость в эксплуатации и быстрота отклика</h2>
+	</div>
+
+	<div class="buttons-main">
+		<a class="button is-primary" href="/reg/">Зарегестироваться</a>
+		<div style="display: flex;justify-content: center;align-items: center;flex-direction: column;">
+			<h1>Уже есть аккаунт?</h1>
+			<a class="button is-primary" style="margin-top: 5px;" href="/login/">Войти</a>
+		</div>
+	</div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	{% block scale %}
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	{% endblock%}
+	<link
+	rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+	<link rel="stylesheet" href="{% static 'base.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+	<title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+<header class="box header navbar content" style="flex-direction: row; justify-content: space-between;align-items: flex-start;display: flex;">
+	<div style="align-items: center;" class="header-text">
+		<h1 class="subtitle is-6">Bookinz</h1>
+	</div>
+	<div class="header-links" style="align-items: center;">
+		{% block urls %}
+		{% endblock %}
+	</div>
+</header>
+{% block content %}{% endblock %}
+<footer class="footer p-5">
+	<!-- <h1 class="subtitle is-5" style="margin-bottom: 10px;">© Oxygen</h1> -->
+	<h1 class="subtitle is-6">created by: i.i.astanin@mpt.ru</h1>
+</footer>
+
+{% block script %}{% endblock %}
+<script src="{% static 'color-scheme.js' %}"></script>
+</body>
+</html>
