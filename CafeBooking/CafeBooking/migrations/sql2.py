@@ -17,4 +17,4 @@ class Migration(migrations.Migration):
         ('CafeBooking', 'sql'),
     ]
 
-    operations = [migrations.RunSQL(SQL)]
+    #operations = [migrations.RunSQL(SQL)]

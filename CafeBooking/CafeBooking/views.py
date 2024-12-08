@@ -719,24 +719,25 @@ def admin_page(request):
         
         reservations = []
         
-        with open('archive.json', 'r', encoding="UTF-8") as file:
-            json_ = json.load(file)
-        
-        for item in json_:
-            rs = dict()
-            __user = User.objects.get(pk=item['fields']['user'])
-            time = Time.objects.get(pk=item['fields']['time'])
-            status = Status.objects.get(pk=item['fields']['status'])
-            __type = Type.objects.get(pk=item['fields']['type'])
-            rs.update({"id": item['pk'] })
-            rs.update(item['fields'])
-            rs.update({"user" : __user})
-            rs.update({"time": time})
-            rs.update({"status": status})
-            rs.update({"type": __type})            
-            reservations.append(rs)
-        
-        data = reservations
+        if os.path.exists('archive.json'):
+            with open('archive.json', 'r', encoding="UTF-8") as file:
+                json_ = json.load(file)
+            
+            for item in json_:
+                rs = dict()
+                __user = User.objects.get(pk=item['fields']['user'])
+                time = Time.objects.get(pk=item['fields']['time'])
+                status = Status.objects.get(pk=item['fields']['status'])
+                __type = Type.objects.get(pk=item['fields']['type'])
+                rs.update({"id": item['pk'] })
+                rs.update(item['fields'])
+                rs.update({"user" : __user})
+                rs.update({"time": time})
+                rs.update({"status": status})
+                rs.update({"type": __type})            
+                reservations.append(rs)
+            
+            data = reservations
     
     form = UploadFileForm()
     
