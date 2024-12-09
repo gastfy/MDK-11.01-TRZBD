@@ -13,6 +13,9 @@ if (theme) {
 		setTheme('theme-light');
 	}
 }
+else {
+	localStorage.setItem('theme', 'theme-dark')
+}
 
 var button = document.querySelector("[name='scheme-changer']")
 button.addEventListener('click', function() {
