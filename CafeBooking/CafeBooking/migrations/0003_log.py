@@ -6,16 +6,27 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('CafeBooking', '0002_alter_office_address_alter_place_office_and_more'),
+        ("CafeBooking", "0002_alter_office_address_alter_place_office_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Log',
+            name="Log",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('timestamp', models.DateTimeField(auto_now_add=True, verbose_name='Время лога')),
-                ('action', models.CharField(max_length=255, verbose_name='Действие')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "timestamp",
+                    models.DateTimeField(auto_now_add=True, verbose_name="Время лога"),
+                ),
+                ("action", models.CharField(max_length=255, verbose_name="Действие")),
             ],
         ),
     ]

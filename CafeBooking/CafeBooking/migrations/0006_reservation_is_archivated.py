@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('CafeBooking', '0005_alter_user_login'),
+        ("CafeBooking", "0005_alter_user_login"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='reservation',
-            name='is_archivated',
-            field=models.BooleanField(default=False, verbose_name='Архивированная запись'),
+            model_name="reservation",
+            name="is_archivated",
+            field=models.BooleanField(
+                default=False, verbose_name="Архивированная запись"
+            ),
         ),
     ]

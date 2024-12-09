@@ -7,14 +7,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('CafeBooking', '0006_reservation_is_archivated'),
+        ("CafeBooking", "0006_reservation_is_archivated"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='reservation',
-            name='creation_time',
-            field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
+            model_name="reservation",
+            name="creation_time",
+            field=models.DateTimeField(
+                auto_now_add=True, default=django.utils.timezone.now
+            ),
             preserve_default=False,
         ),
     ]

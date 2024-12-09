@@ -7,15 +7,34 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('CafeBooking', '0007_reservation_creation_time'),
+        ("CafeBooking", "0007_reservation_creation_time"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Setting',
+            name="Setting",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('months_to_archive', models.IntegerField(default=2, validators=[django.core.validators.MinValueValidator(1, 'Нельзя поставить значение меньше 1')], verbose_name='Срок хранения данных')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "months_to_archive",
+                    models.IntegerField(
+                        default=2,
+                        validators=[
+                            django.core.validators.MinValueValidator(
+                                1, "Нельзя поставить значение меньше 1"
+                            )
+                        ],
+                        verbose_name="Срок хранения данных",
+                    ),
+                ),
             ],
         ),
     ]

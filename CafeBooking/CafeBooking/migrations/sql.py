@@ -12,10 +12,11 @@ $$;
 
 """
 
+
 class Migration(migrations.Migration):
-    
+
     dependencies = [
-        ('CafeBooking', '0008_setting'),
+        ("CafeBooking", "0008_setting"),
     ]
 
-    #operations = [migrations.RunSQL(SQL)]
+    # operations = [migrations.RunSQL(SQL)]
