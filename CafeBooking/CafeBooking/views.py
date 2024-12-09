@@ -17,28 +17,52 @@ from django.db import connection
 from django.db import transaction
 
 
+def create_reservation(user: User, time: Time, status: Status, place: Type, date: datetime.date):
+    """:user: object of class User \n
+    :time: object of class Time \n
+    :status: object of class Status \n
+    :place: object of class Type \n
+    :date: Object of class datetime.date \n
+    Creates a reservation and saves it to database
+    """
+    
+    reservation = Reservation()
+    reservation.user = user
+    reservation.time = time
+    reservation.status = status
+    reservation.type = place
+    reservation.date = date
+    reservation.save()
+
+
 @admin_decorator
 def delete_rs_archived(request):
-    with connection.cursor() as cursor:
-        cursor.execute("CALL delete_archived();")
-    
+    """Executes function called 'delete_archived' and redirects back to admin-page"""
+    Reservation.objects.filter(is_archivated=True).delete()
     return redirect('/admin/')
-
 
 
 @authorized
 def book_qr_code(request, id):
+    """
+    :id: Id of a place\n
+    Creates a 'Reservation' object and saves it to database\n
+    After that redirects on error page or success page
+    """
     place = Type.objects.get(pk=id)
     today = datetime.date.today()
     error = None
-    time = "Утреннее" if datetime.datetime.now().time() < datetime.time(14, 0) else "Вечернее" if datetime.datetime.now().time() > datetime.time(14, 0) and datetime.datetime.now().time() < datetime.time(19, 0) else None
+    time = "Утреннее" if datetime.datetime.now().time() < datetime.time(14, 0) \
+        else "Вечернее" if datetime.datetime.now().time() > datetime.time(14, 0) \
+            and datetime.datetime.now().time() < datetime.time(19, 0) else None
     
     if time is None:
         error = "На сегодня бронирование больше недоступно!"
         args = {'error': error}
         return render(request, "error.html", args)
     
-    is_booked = Reservation.objects.exclude(is_archivated=True).filter(time__time=time, date=today, type=place, status__status="Забронировано").exists()
+    is_booked = Reservation.objects.exclude(is_archivated=True) \
+                    .filter(time__time=time, date=today, type=place, status__status="Забронировано").exists()
     
     if is_booked:
         error = "Данное место уже забронировано!"
@@ -50,17 +74,17 @@ def book_qr_code(request, id):
         return redirect('/login/')
     user = User.objects.filter(id = id).first()
     
-    rs = Reservation()
-    rs.user = user
-    rs.time = Time.objects.filter(time=time).first()
-    rs.status = Status.objects.filter(status="Забронировано").first()
-    rs.type = place
-    rs.date = today
-    rs.save()
+    create_reservation(user, Time.objects.filter(time=time).first(), 
+                       Status.objects.filter(status="Забронировано").first(), place, today)
+    
     return redirect('/success/')
     
     
 def create_if_not_exists(dir_name: str):
+    """
+    :dir_name: Name of a directory to create\n
+    Creates a directory if it doesn't exists in CWD
+    """
     cwd = os.getcwd()
     if not os.path.exists(f'{cwd}\\{dir_name}'):
         path = os.path.join(cwd, dir_name)
@@ -68,7 +92,11 @@ def create_if_not_exists(dir_name: str):
 
 
 @head_decorator
-def download_qrcodes(request):
+def __download_qrcodes(request):
+    """
+    Creates an xlsx file with QR-code pictures in it.\n
+    Returns file as a response.
+    """
     id = request.session.get('id', -1)
     if id == -1:
         return redirect('/login/')
@@ -82,30 +110,32 @@ def download_qrcodes(request):
     for office in offices:
         data = []
         
-        print(socket.gethostbyname(socket.gethostname()))
-        
-        if not os.path.exists(f"{cwd}\\qr-codes\\office {office.id}"):
-            path = os.path.join(cwd, f"qr-codes\\office {office.id}")
-            os.mkdir(path)
+        create_if_not_exists(f"qr-codes\\office {office.id}")
             
         places = list(Type.objects.filter(place__office=office).all())
         for place in places:
             url = f"http://{socket.gethostbyname(socket.gethostname())}:8000/qr_book/{place.pk}"
+            
             qr = qrcode.QRCode(
                 version=1,
                 error_correction=qrcode.constants.ERROR_CORRECT_L,
                 box_size=10,
                 border=2
             )
+            
             qr.add_data(url)
             qr.make(fit=True)
             qr_img = qr.make_image(fill_color="black", back_color="white").convert('RGB')
+            
             font = ImageFont.truetype(f"{cwd}\\fonts\\Montserrat-Light.ttf", size=20)
+            
             text_bbox = font.getbbox(place.place.short_name)
             text_width = text_bbox[2] - text_bbox[0]
             text_height = text_bbox[3] - text_bbox[1]
+            
             img_width = max(qr_img.width, text_width + 20)
             img_height = qr_img.height + text_height + 20
+            
             img = Image.new('RGB', (img_width, img_height), 'white')
 
             # Вставляем QR-код в изображение
@@ -114,7 +144,8 @@ def download_qrcodes(request):
             # Рисуем текст под QR-кодом
             draw = ImageDraw.Draw(img)
             text_position = (((img_width - text_width) // 2) - 27, qr_img.height)
-            draw.text(text_position, f"{"Стол" if place.name == "Стол" else "Комната"}: " + place.place.short_name, fill="black", font=font)
+            draw.text(text_position, f"{"Стол" if place.name == "Стол" else "Комната"}: " 
+                      + place.place.short_name, fill="black", font=font)
 
             # Сохраняем изображение в файл
             try:
@@ -129,6 +160,7 @@ def download_qrcodes(request):
     
     for row_num, d in enumerate(data, start=1):
         excel_img = ExcelImage(d['image'])
+        
         worksheet.add_image(excel_img, f"A{row_num}")
         worksheet.row_dimensions[row_num].height = excel_img.height
         worksheet.column_dimensions["A"].width = 40
@@ -143,56 +175,79 @@ def download_qrcodes(request):
 
 @head_decorator
 def head_panel(request):
+    """
+    Returns render of a head panel.
+    """
     return render(request, "head_panel.html")
 
 
 @authorized
 def settings(request):
+    """
+    Returns render of a settings page.
+    """
     return render(request, 'settings.html')
 
 
 @authorized
 def continue_reservation(request, id):
+    """
+    :id: Id of a reservation\n
+    Creates new reservation object on base of another reservation.
+    Then saves it to database.
+    """
     success = request.GET.get('success', '0')
     if success == "1":
-        rs = Reservation.objects.get(pk=id)
+        if Reservation.objects.filter(pk=id).exists() == False:
+            return redirect('/user-reservations/')
+        
+        reservation = Reservation.objects.get(pk=id)
         _time = Time.objects.filter(time = "Вечернее").first()
-        rs_new = Reservation()
-        rs_new.user = rs.user
-        rs_new.time = _time
-        rs_new.status = rs.status
-        rs_new.type = rs.type
-        rs_new.date = rs.date
-        rs_new.save()
+        create_reservation(reservation.user, _time, reservation.status, reservation.type, reservation.date)
         return redirect('/success/')
     else:
-        rs = Reservation.objects.get(pk=id)
+        if Reservation.objects.filter(pk=id).exists() == False:
+            return redirect('/user-reservations/')
         
-        if rs.check_continue() is False:
+        reservation = Reservation.objects.get(pk=id)
+        
+        if reservation.check_continue() is False:
             return redirect('/user-reservations/')
         
         time = "Вечернее"
         
-        args = {"rs": rs, "time": time}
+        args = {"rs": reservation, "time": time}
         return render(request, "continue.html", args)
 
 
 @authorized
 def cancel(request, id):
+    """
+    :id: Id of a reservation to cancel \n
+    Changes status of a reservation to "Canceled"
+    """
     success = request.GET.get('success', '0')
     if success == "1":
-        rs = Reservation.objects.get(pk=id)
+        
+        if Reservation.objects.filter(pk=id).exists() == False:
+            return redirect('/user-reservations/')
+        
+        reservation = Reservation.objects.get(pk=id)
         status = Status.objects.filter(status = "Отменено").first()
-        rs.status = status
-        rs.cancel_reason = "Отменено пользователем!"
-        rs.save()
+        reservation.status = status
+        reservation.cancel_reason = "Отменено пользователем!"
+        reservation.save()
         return redirect('/success/')
         
     else:
-        rs = Reservation.objects.get(pk=id)
-        args = {"rs": rs}
+        if Reservation.objects.filter(pk=id).exists() == False:
+            return redirect('/user-reservations/')
+        
+        reservation = Reservation.objects.get(pk=id)
+        args = {"rs": reservation}
         return render(request, "cancel.html", args)
 
+# ///////////////////////////////////////////////////////////////
 
 @authorized
 def user_reservations(request):
@@ -223,7 +278,8 @@ def user_reservations(request):
     closed = Status.objects.filter(status = "Завершено").first()
     canceled = Status.objects.filter(status = "Отменено").first()
     
-    active_reservations = list(Reservation.objects.exclude(is_archivated=True).filter(user=user, status=status).all())
+    active_reservations = list(Reservation.objects.exclude(is_archivated=True) 
+                               .filter(user=user, status=status).all())
     history = list(Reservation.objects.exclude(is_archivated=True).filter(user=user, status__in=[closed, canceled]).all())
     active = []
     

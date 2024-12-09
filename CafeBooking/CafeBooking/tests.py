@@ -1,8 +1,24 @@
 from django.test import TestCase
-from .models import User, Role
+from .models import User, Role, Reservation, Time, Status, Place
 import hashlib
+import datetime
 
 class TestCases(TestCase):
+    
+    def create_reservation():
+        """
+        Tests creation of a reservation
+        """
+        
+        
+        rs = Reservation()
+        rs.user = User.objects.first()
+        rs.time = Time.objects.first()
+        rs.status = Status.objects.first()
+        rs.type = Place.objects.first()
+        rs.date = datetime.date.today()
+        rs.save()
+    
     
     def login(self, login, password):
         hasher = hashlib.sha256(usedforsecurity=True)
@@ -125,4 +141,4 @@ class TestCases(TestCase):
         print('test 7 success')
         user = self.login(login, password)
         self.assertIsNone(user)
-    
+        
