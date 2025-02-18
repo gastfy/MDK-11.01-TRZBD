@@ -14,10 +14,13 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
+
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from .views import delete_rs_archived, book_qr_code, admin_page, __download_qrcodes, head_panel, settings, user_reservations, success, book, set_archive_time, reservations, menu, reg_page, login_page, add_entity, edit_entity, delete_entity, ban_user, cancel_reservation, unban_user, homepage, download_report, create_dump, upload, profile, logout, delete_account, update_user
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from .tasks import Status, Time
 from .views import log, cancel, continue_reservation
 
@@ -55,6 +58,9 @@ def init():
             time__.time = "Весь день"
             time__.save()
 
+def metrics_view(request):
+    metrics = generate_latest()
+    return HttpResponse(metrics, content_type=CONTENT_TYPE_LATEST)
 
 urlpatterns = [
     path('django-admin/', admin.site.urls),
@@ -87,5 +93,7 @@ urlpatterns = [
     path("download-qrcodes/", __download_qrcodes),
     path('qr_book/<int:id>/', book_qr_code),
     path('delete-archivated/', delete_rs_archived),
+    path('', include('django_prometheus.urls')),
     path('', homepage),
 ]
+

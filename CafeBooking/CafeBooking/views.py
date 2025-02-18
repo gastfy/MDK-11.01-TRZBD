@@ -2,7 +2,7 @@ from io import StringIO
 from django.shortcuts import render, redirect
 from .forms import *
 from .decorators import admin_decorator, HttpResponseRedirect, authorized, head_decorator
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponse
 import pandas as pd
 from django.core.management import call_command
 import json
@@ -15,7 +15,7 @@ from openpyxl.drawing.image import Image as ExcelImage
 from openpyxl import Workbook
 from django.db import connection
 from django.db import transaction
-
+from prometheus_client import CollectorRegistry, Counter, Gauge
 
 def create_reservation(user: User, time: Time, status: Status, place: Type, date: datetime.date):
     """:user: object of class User \n

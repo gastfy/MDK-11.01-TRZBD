@@ -1,3 +1,5 @@
+import os
+import time
 from huey.contrib.djhuey import db_periodic_task
 from huey.contrib.djhuey import periodic_task
 from huey import crontab, RedisHuey
@@ -6,6 +8,24 @@ from .views import log
 import datetime
 import pytz
 from django.utils import timezone
+from prometheus_client import REGISTRY, CollectorRegistry, Counter, Gauge, multiprocess
+from huey.contrib.djhuey import HUEY as huey
+from huey.signals import SIGNAL_EXECUTING, SIGNAL_COMPLETE, SIGNAL_ERROR, SIGNAL_LOCKED, SIGNAL_INTERRUPTED, SIGNAL_CANCELED, SIGNAL_SCHEDULED
+
+
+def get_registry():
+    if 'prometheus_multiproc_dir' in os.environ:
+        registry = CollectorRegistry()
+        multiprocess.MultiProcessCollector(registry)
+    else:
+        registry = REGISTRY
+    return registry
+
+
+RUNNING_COUNTER = Gauge('huey_running_tasks', "Returns count of running tasks", registry=get_registry())
+FINISHED_COUNTER = Counter('huey_finished_tasks', "Returns count of finished tasks", registry=get_registry())
+ERROR_COUNTER = Counter('huey_error_tasks', "Returns count of error tasks", registry=get_registry())
+
 
 def calculate_utc_time(local_time):
     return local_time.astimezone(datetime.UTC)
@@ -18,6 +38,25 @@ utc_time_evening = calculate_utc_time(local_time_evening)
 
 local_time_end = timezone.datetime(year=timezone.now().year, month=timezone.now().month, day=timezone.now().day, hour=23, minute=0)
 utc_time_end = calculate_utc_time(local_time_end)
+
+@huey.signal(SIGNAL_EXECUTING)
+def task_signal_executing(signal, task):
+    RUNNING_COUNTER.inc(1)
+    print(RUNNING_COUNTER.collect())
+
+
+@huey.signal(SIGNAL_COMPLETE)
+def task_signal_complete(signal, task):
+    FINISHED_COUNTER.inc(1)
+    RUNNING_COUNTER.dec(1)
+    print(RUNNING_COUNTER.collect())
+    print(FINISHED_COUNTER.collect())
+
+
+@huey.signal(SIGNAL_ERROR, SIGNAL_LOCKED, SIGNAL_INTERRUPTED, SIGNAL_CANCELED)
+def task_signal_error(signal, task, exc=None):
+    ERROR_COUNTER.inc(1)
+    print(ERROR_COUNTER.collect())
 
 
 @db_periodic_task(crontab(hour=f"{utc_time_morning.hour}", minute=f"{utc_time_morning.minute}"), retries=2, retry_delay=240)
@@ -140,6 +179,8 @@ def not_handled_finish():
     print("NOT HANDLED task successfully executed!")
         
 
-@periodic_task(crontab(minute='*/5'))
+@periodic_task(crontab(minute='*/1'))
 def ping():
+    time.sleep(20)
     print("ping at: ", datetime.datetime.now())
+    # print(get_executing_count())
