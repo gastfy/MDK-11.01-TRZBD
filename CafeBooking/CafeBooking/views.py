@@ -1,4 +1,5 @@
 from io import StringIO
+import threading
 from django.shortcuts import render, redirect
 from .forms import *
 from .decorators import admin_decorator, HttpResponseRedirect, authorized, head_decorator
@@ -16,6 +17,53 @@ from openpyxl import Workbook
 from django.db import connection
 from django.db import transaction
 from prometheus_client import CollectorRegistry, Counter, Gauge
+import logging
+from influxdb_client import InfluxDBClient, Point, WritePrecision
+from influxdb_client.client.write_api import SYNCHRONOUS
+from influxdb_client.client.flux_table import FluxTable, FluxRecord
+import time
+
+
+INFLUXDB_TOKEN='vIDJ4DT6Z1krbRsjU9JZR_kpMo_3CA9DO1lCHoJslJPrT3fezdhXMJeqXFaO0xFUTGADxEWQq7GTZOKRGKajew=='
+org = "kursachh"
+url = "http://influxdb:8086"
+
+client = InfluxDBClient(url=url, token=INFLUXDB_TOKEN, org=org)
+bucket="own_metrics"
+
+write_api = client.write_api(write_options=SYNCHRONOUS)
+query_api = client.query_api()
+
+
+def increment_and_write(measurement_name, increment_value=1):
+    try:
+        query = f'from(bucket: "{bucket}") |> range(start: -1d) |> filter(fn: (r) => r["_measurement"] == "{measurement_name}") |> last()'
+        tables: list[FluxTable] = query_api.query(query=query, org=org)
+        current_value = 0
+        if len(tables) > 0 and len(tables[0].records) > 0:
+            current_value = tables[0].records[0]["_value"]
+
+        new_value = current_value + increment_value
+
+        point = Point(measurement_name).field("count", new_value).time(time.time_ns(), WritePrecision.NS)
+        write_api.write(bucket=bucket, org=org, record=point)
+
+    except Exception as e:
+        logging.error(f"Error incrementing and writing {measurement_name}: {e}")
+
+
+def send_metrics():
+    while True:
+        increment_and_write("registration_counter", 0)
+        increment_and_write("login_counter", 0)
+        increment_and_write("homepage_views_counter", 0)
+        time.sleep(2)
+
+
+metric_thread = threading.Thread(target=send_metrics)
+metric_thread.daemon = True
+metric_thread.start()
+
 
 def create_reservation(user: User, time: Time, status: Status, place: Type, date: datetime.date):
     """:user: object of class User \n
@@ -92,7 +140,7 @@ def create_if_not_exists(dir_name: str):
 
 
 @head_decorator
-def __download_qrcodes(request):
+def download_qrcodes(request):
     """
     Creates an xlsx file with QR-code pictures in it.\n
     Returns file as a response.
@@ -817,6 +865,7 @@ def admin_page(request):
 
 
 def homepage(request):
+    increment_and_write('homepage_views_counter')
     return render(request, "homepage.html")
 
 
@@ -852,6 +901,8 @@ def reg_page(request):
             user.save()
             request.session['id'] = user.pk
             request.session['role'] = user.role.decrypt()
+            increment_and_write('registration_counter')
+            
             return redirect('/menu/')
     
     else:
@@ -904,9 +955,11 @@ def login_page(request):
                 request.session['role'] = user.role.decrypt()
                 if user.role.name == "Admin":
                     log(f"Пользователь с id: '{user.pk}' с ролью: '{user.role.decrypt()}' вошел в систему!")
+                    increment_and_write('login_counter')
                     return redirect('/admin/')
                 else:
                     log(f"Пользователь с id: '{user.pk}' с ролью: '{user.role.decrypt()}' вошел в систему!")
+                    increment_and_write('login_counter')
                     return redirect('/menu/')
     
     else:

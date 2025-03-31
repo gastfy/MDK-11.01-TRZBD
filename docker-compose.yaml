@@ -1,0 +1,113 @@
+version: '3.9'
+
+services:
+  web:
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    ports: 
+    - 8000:8000
+    build: ./
+    links:
+    - db
+    depends_on:
+      - db
+      - influxdb
+    volumes:
+    - ./CafeBooking:/app
+    networks:
+      - monitoring
+    
+  db:
+    image: postgres:latest
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: "praktika"
+      POSTGRES_USER: "praktika"
+      POSTGRES_PASSWORD: "123456789"
+    ports:
+      - "5432:5432"
+    networks:
+      - monitoring
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - prometheus_data:/prometheus
+    container_name: prometheus
+    hostname: prometheus
+    command: 
+      - --config.file=/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090
+    restart: always
+    depends_on:
+      - web
+    environment:
+      TZ: "Europe/Moscow"
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    user: root
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
+    volumes:
+      - ./grafana:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    container_name: grafana
+    hostname: grafana
+    restart: always
+    environment:
+      TZ: "Europe/Moscow"
+    networks:
+      - monitoring
+
+  influxdb:
+    image: influxdb:latest
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb-storage:/var/lib/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=admin_password123
+      - DOCKER_INFLUXDB_INIT_ORG=kursachh
+      - DOCKER_INFLUXDB_INIT_BUCKET=kursach-metrics
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=admin-token
+    networks:
+      - monitoring
+
+  telegraf:
+    image: telegraf:latest
+    container_name: telegraf
+    restart: always
+    networks:
+      - monitoring
+    depends_on:
+      - influxdb
+      - web
+    volumes:
+      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /sys:/rootfs/sys:ro
+      - /proc:/rootfs/proc:ro
+      - /etc:/rootfs/etc:ro
+    environment:
+      HOST_PROC: /rootfs/proc
+      HOST_SYS: /rootfs/sys
+      HOST_ETC: /rootfs/etc
+    privileged: true
+
+networks:
+  monitoring:
+
+volumes:
+  dbdata:
+  prometheus_data:
+  influxdb-storage:
+    external: false

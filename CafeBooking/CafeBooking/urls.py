@@ -19,7 +19,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
-from .views import delete_rs_archived, book_qr_code, admin_page, __download_qrcodes, head_panel, settings, user_reservations, success, book, set_archive_time, reservations, menu, reg_page, login_page, add_entity, edit_entity, delete_entity, ban_user, cancel_reservation, unban_user, homepage, download_report, create_dump, upload, profile, logout, delete_account, update_user
+from .views import delete_rs_archived, book_qr_code, admin_page, download_qrcodes, head_panel, settings, user_reservations, success, book, set_archive_time, reservations, menu, reg_page, login_page, add_entity, edit_entity, delete_entity, ban_user, cancel_reservation, unban_user, homepage, download_report, create_dump, upload, profile, logout, delete_account, update_user
 from django.http import HttpResponse, HttpResponseRedirect
 from .tasks import Status, Time
 from .views import log, cancel, continue_reservation
@@ -90,7 +90,7 @@ urlpatterns = [
     path('continue/<int:id>/', continue_reservation),
     path('settings/', settings),
     path("head-panel/", head_panel),
-    path("download-qrcodes/", __download_qrcodes),
+    path("download-qrcodes/", download_qrcodes),
     path('qr_book/<int:id>/', book_qr_code),
     path('delete-archivated/', delete_rs_archived),
     path('', include('django_prometheus.urls')),
